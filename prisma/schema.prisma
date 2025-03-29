@@ -29,6 +29,12 @@ enum OrderStatus {
   CANCELLED
 }
 
+enum SessionStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
 model User {
   id        String   @id @default(cuid())
   username  String
@@ -40,27 +46,41 @@ model User {
 }
 
 model Restaurant {
-  id          String     @id @default(cuid())
+  id          String        @id @default(cuid())
   name        String
   description String?
   address     String
   tables      Table[]
   menuItems   MenuItem[]
   orders      Order[]
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  sessions    TableSession[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 }
 
 model Table {
-  id           String     @id @default(cuid())
-  tableNumber  String     // e.g., "Table 1", "A1", etc.
-  qrCode       String     @unique // Each table has its own unique QR code
-  capacity     Int        // Number of seats
+  id           String        @id @default(cuid())
+  tableNumber  String        // e.g., "Table 1", "A1", etc.
+  qrCode       String        @unique // Each table has its own unique QR code
+  capacity     Int           // Number of seats
   restaurantId String
-  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+  restaurant   Restaurant    @relation(fields: [restaurantId], references: [id])
+  sessions     TableSession[]
   orders       Order[]
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model TableSession {
+  id           String        @id @default(cuid())
+  tableId      String
+  table        Table         @relation(fields: [tableId], references: [id])
+  restaurantId String
+  restaurant   Restaurant    @relation(fields: [restaurantId], references: [id])
+  status       SessionStatus @default(ACTIVE)
+  orders       Order[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 }
 
 model MenuItem {
@@ -85,6 +105,8 @@ model Order {
   restaurant   Restaurant  @relation(fields: [restaurantId], references: [id])
   tableId      String
   table        Table       @relation(fields: [tableId], references: [id])
+  sessionId    String
+  session      TableSession @relation(fields: [sessionId], references: [id])
   status       OrderStatus @default(PENDING)
   items        OrderItem[]
   totalAmount  Float
