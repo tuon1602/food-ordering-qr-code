@@ -2,7 +2,6 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import Profile from "@/components/Profile";
 import SignOutButton from "../components/SignOutButton";
-import SignInButton from "@/components/SignInButton";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import FormActionTest from "@/components/FormActionTest";
 import { useTranslations } from "next-intl";

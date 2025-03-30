@@ -1,13 +1,62 @@
-// This file should handle all auth logic for nextauth v5
-
 import NextAuth from "next-auth";
-import Google from "next-auth/providers/google";
-import Github from "next-auth/providers/github";
+import Credentials from "next-auth/providers/credentials";
+import { login } from "./app/actions/authentication/auth";
+import { User } from "@prisma/client";
 
 export const config = {
-  providers: [Github, Google],
+  providers: [
+    Credentials({
+      // You can specify which fields should be submitted, by adding keys to the `credentials` object.
+      // e.g. domain, username, password, 2FA token, etc.
+      credentials: {
+        username: {},
+        password: {},
+      },
+      authorize: async (credentials): Promise<User | null> => {
+        if (!credentials?.username || !credentials?.password) {
+          console.log("Missing credentials");
+          return null;
+        }
+        try {
+          const result = await login(credentials.username as string, credentials.password as string);
+          
+          if (result.error) {
+            console.log("Login error:", result.error);
+            return null;
+          }
+          console.log(result.user);
+          return result.user as User;
+        } catch (error) {
+          console.error("Auth error:", error);
+          return null;
+        }
+      },
+    }),
+  ],
+  secret: process.env.NEXTAUTH_SECRET,
+  maxAge: 3600,
   pages: {
     signIn: "/login",
+  },
+  session: {
+    strategy: "jwt" as const,
+  },
+  callbacks: {
+    async jwt({ token, user }: { token: any, user: any }) {
+      if (user) {
+        token.id = user.id;
+        token.role = user.role;
+      }
+      return token;
+    },
+    async session({ session, token }: { session: any, token: any }) {
+      if (session.user) {
+        session.user.id = token.id as string;
+        session.user.role = token.role as string;
+        session.user.username = token.username as string;
+      }
+      return session;
+    },
   },
 };
 
