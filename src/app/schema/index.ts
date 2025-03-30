@@ -17,3 +17,10 @@ export const actionSchema = z.object({
     .string({ required_error: "Your password is required" })
     .min(4, { message: "Your password be at least 4 characters" }),
 });
+
+export const loginSchema = z.object({
+  username: z.string({ required_error: "Tài khoản không được để trống" })
+    .min(1, "Tài khoản không được để trống"),
+  password: z.string({ required_error: "Mật khẩu không được để trống" })
+    .min(1, "Mật khẩu không được để trống")
+});

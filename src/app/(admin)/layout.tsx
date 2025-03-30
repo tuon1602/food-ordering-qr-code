@@ -22,7 +22,7 @@ export default async function AdminDashboardLayout({
   if (!session) redirect("/login");
   return (
     <ReactQueryProvider>
-      <section>
+      <section className={inter.className}>
         <nav></nav>
         {children}
       </section>

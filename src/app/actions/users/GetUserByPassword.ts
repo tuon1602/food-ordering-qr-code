@@ -8,6 +8,9 @@ export const GetUserByPassword = async (username: string, password: string) => {
       username: username,
     },
   });
+  if (!user) {
+    return null;
+  }
   const match = await bcrypt.compare(password, user?.password as string);
   if (match) {
     return user;
